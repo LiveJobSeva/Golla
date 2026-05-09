@@ -1,65 +1,95 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Golla Voice App</title>
-    <style>
-        body { background: #0b141a; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #162127; padding: 30px; border-radius: 20px; border: 1px solid #00a884; width: 85%; max-width: 350px; text-align: center; }
-        #status { margin: 20px 0; font-weight: bold; color: #ffcc00; }
-        .btn { background: #00a884; border: none; padding: 15px; color: white; border-radius: 10px; font-size: 18px; width: 100%; cursor: pointer; }
-        .btn:disabled { background: #333; cursor: not-allowed; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LiveKit Test</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #00b894;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #00ff99;
+    }
+
+    audio {
+      margin-top: 15px;
+    }
+  </style>
 </head>
 <body>
-    <div class="card">
-        <h2>🎙️ Golla Voice</h2>
-        <div id="status">Library Loading...</div>
-        <button id="mainBtn" class="btn" onclick="connect()" disabled>Wait for Library</button>
-    </div>
 
-    <script src="https://unpkg.com/livekit-client@1.15.4/dist/livekit-client.umd.min.js"></script>
+  <h1>LiveKit Voice Test</h1>
 
-    <script>
-        // Library check karne ke liye
-        window.onload = function() {
-            if (typeof LiveKit !== 'undefined') {
-                document.getElementById('status').innerText = "Ready to Connect";
-                document.getElementById('mainBtn').disabled = false;
-                document.getElementById('mainBtn').innerText = "Start Connection";
-            } else {
-                document.getElementById('status').innerText = "❌ Library Error";
-                alert("Bhai, library load nahi ho payi. Ek baar page refresh karein.");
-            }
-        };
+  <button onclick="joinRoom()">Join Room</button>
 
-        async function connect() {
-            const status = document.getElementById('status');
-            const btn = document.getElementById('mainBtn');
-            
-            const url = "wss://golla-9cleum8t.livekit.cloud";
-            // Yaad rakhein: Agar 15 min se zyada ho gaye hain toh naya token lagega
-            const token = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzgyOTg4NTIsImlkZW50aXR5IjoiR29sbGFDaGF0IiwiaXNzIjoiQVBJUVBmWFZnVFo0VzlzIiwibmJmIjoxNzc4Mjk3OTUyLCJzdWIiOiJHb2xsYUNoYXQiLCJ2aWRlbyI6eyJjYW5QdWJsaXNoIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJyb29tIjoibWFpbi1yb29tIiwicm9vbUpvaW4iOnRydWV9fQ.H0RNxumWUECx_1KekGi-y9GSvW9Ly41jqaiIzIXm21A";
+  <div id="status">Disconnected</div>
 
-            try {
-                btn.disabled = true;
-                status.innerText = "Connecting...";
-                
-                const room = new LiveKit.Room();
-                await room.connect(url, token);
-                
-                status.innerText = "✅ ONLINE";
-                status.style.color = "#00ff88";
-                
-                await room.localParticipant.setMicrophoneEnabled(true);
-                alert("Connect ho gaya!");
-            } catch (e) {
-                btn.disabled = false;
-                status.innerText = "❌ Error";
-                alert("Error: " + e.message);
-            }
-        }
-    </script>
+  <script>
+    const LIVEKIT_URL = "wss://golla-9cleum8t.livekit.cloud";
+
+    const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzgyOTg4NTIsImlkZW50aXR5IjoiR29sbGFDaGF0IiwiaXNzIjoiQVBJUVBmWFZnVFo0VzlzIiwibmJmIjoxNzc4Mjk3OTUyLCJzdWIiOiJHb2xsYUNoYXQiLCJ2aWRlbyI6eyJjYW5QdWJsaXNoIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJyb29tIjoibWFpbi1yb29tIiwicm9vbUpvaW4iOnRydWV9fQ.H0RNxumWUECx_1KekGi-y9GSvW9Ly41jqaiIzIXm21A";
+
+    async function joinRoom() {
+      try {
+        document.getElementById("status").innerText = "Connecting...";
+
+        const room = new LivekitClient.Room();
+
+        await room.connect(LIVEKIT_URL, TOKEN);
+
+        document.getElementById("status").innerText = "✅ Connected to LiveKit";
+
+        // Enable microphone
+        await room.localParticipant.enableCameraAndMicrophone(false, true);
+
+        console.log("Connected Room:", room.name);
+
+        // Listen for remote users
+        room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+          console.log("Track subscribed from:", participant.identity);
+
+          if (track.kind === 'audio') {
+            const audioElement = track.attach();
+            document.body.appendChild(audioElement);
+          }
+        });
+
+        room.on(LivekitClient.RoomEvent.ParticipantConnected, (participant) => {
+          console.log("User Joined:", participant.identity);
+        });
+
+        room.on(LivekitClient.RoomEvent.ParticipantDisconnected, (participant) => {
+          console.log("User Left:", participant.identity);
+        });
+
+      } catch (error) {
+        console.error(error);
+        document.getElementById("status").innerText = "❌ Connection Failed";
+      }
+    }
+  </script>
+
 </body>
 </html>
