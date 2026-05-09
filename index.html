@@ -2,94 +2,138 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LiveKit Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LiveKit Chatroom Test</title>
 
   <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
 
   <style>
-    body {
-      background: #111;
-      color: white;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
+    body{
+      margin:0;
+      padding:20px;
+      background:#0f172a;
+      color:white;
+      font-family:Arial;
+      text-align:center;
     }
 
-    button {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 10px;
-      background: #00b894;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 20px;
+    h1{
+      color:#00ffcc;
     }
 
-    #status {
-      margin-top: 20px;
-      font-size: 18px;
-      color: #00ff99;
+    button{
+      padding:12px 20px;
+      border:none;
+      border-radius:12px;
+      background:#00c853;
+      color:white;
+      font-size:16px;
+      cursor:pointer;
+      margin-top:20px;
     }
 
-    audio {
-      margin-top: 15px;
+    #status{
+      margin-top:20px;
+      font-size:18px;
+      color:#00ff99;
+    }
+
+    .box{
+      max-width:500px;
+      margin:auto;
+      background:#1e293b;
+      padding:20px;
+      border-radius:20px;
+      box-shadow:0 0 15px rgba(0,0,0,0.4);
     }
   </style>
 </head>
 <body>
 
-  <h1>LiveKit Voice Test</h1>
+<div class="box">
+
+  <h1>LiveKit Voice Chat Test</h1>
+
+  <p>Room: <b>Chatroom</b></p>
 
   <button onclick="joinRoom()">Join Room</button>
 
   <div id="status">Disconnected</div>
 
-  <script>
-    const LIVEKIT_URL = "wss://golla-9cleum8t.livekit.cloud";
+</div>
 
-    const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzgyOTg4NTIsImlkZW50aXR5IjoiR29sbGFDaGF0IiwiaXNzIjoiQVBJUVBmWFZnVFo0VzlzIiwibmJmIjoxNzc4Mjk3OTUyLCJzdWIiOiJHb2xsYUNoYXQiLCJ2aWRlbyI6eyJjYW5QdWJsaXNoIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJyb29tIjoibWFpbi1yb29tIiwicm9vbUpvaW4iOnRydWV9fQ.H0RNxumWUECx_1KekGi-y9GSvW9Ly41jqaiIzIXm21A";
+<script>
 
-    async function joinRoom() {
-      try {
-        document.getElementById("status").innerText = "Connecting...";
+const LIVEKIT_URL = "wss://golla-9cleum8t.livekit.cloud";
 
-        const room = new LivekitClient.Room();
+const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzgzMDA3NzcsImlkZW50aXR5IjoiQ2hhdHJvb20iLCJpc3MiOiJBUElRUGZYVmdUWjRXOXMiLCJuYmYiOjE3NzgyOTk4NzcsInN1YiI6IkNoYXRyb29tIiwidmlkZW8iOnsiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuUHVibGlzaERhdGEiOnRydWUsImNhblN1YnNjcmliZSI6dHJ1ZSwicm9vbSI6IkNoYXRyb29tIiwicm9vbUpvaW4iOnRydWV9fQ.SrbUvQlLAFQKG6ePh1lro2QlCv9JPjiFOsa5UkOzM4o";
 
-        await room.connect(LIVEKIT_URL, TOKEN);
+let room;
 
-        document.getElementById("status").innerText = "✅ Connected to LiveKit";
+async function joinRoom() {
 
-        // Enable microphone
-        await room.localParticipant.enableCameraAndMicrophone(false, true);
+  try {
 
-        console.log("Connected Room:", room.name);
+    document.getElementById("status").innerText = "Connecting...";
 
-        // Listen for remote users
-        room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
-          console.log("Track subscribed from:", participant.identity);
+    room = new LivekitClient.Room();
 
-          if (track.kind === 'audio') {
-            const audioElement = track.attach();
-            document.body.appendChild(audioElement);
-          }
-        });
+    await room.connect(LIVEKIT_URL, TOKEN);
 
-        room.on(LivekitClient.RoomEvent.ParticipantConnected, (participant) => {
-          console.log("User Joined:", participant.identity);
-        });
+    document.getElementById("status").innerText =
+      "✅ Connected to Chatroom";
 
-        room.on(LivekitClient.RoomEvent.ParticipantDisconnected, (participant) => {
-          console.log("User Left:", participant.identity);
-        });
+    console.log("Connected!");
 
-      } catch (error) {
-        console.error(error);
-        document.getElementById("status").innerText = "❌ Connection Failed";
+    // Mic Enable
+    await room.localParticipant.enableMicrophone(true);
+
+    console.log("Microphone Enabled");
+
+    // User Joined
+    room.on(
+      LivekitClient.RoomEvent.ParticipantConnected,
+      participant => {
+        console.log("User Joined:", participant.identity);
       }
-    }
-  </script>
+    );
+
+    // Receive Audio
+    room.on(
+      LivekitClient.RoomEvent.TrackSubscribed,
+      (track, publication, participant) => {
+
+        console.log("Track Received From:", participant.identity);
+
+        if (track.kind === "audio") {
+
+          const audioElement = track.attach();
+
+          document.body.appendChild(audioElement);
+
+        }
+      }
+    );
+
+    // User Left
+    room.on(
+      LivekitClient.RoomEvent.ParticipantDisconnected,
+      participant => {
+        console.log("User Left:", participant.identity);
+      }
+    );
+
+  } catch (err) {
+
+    console.error(err);
+
+    document.getElementById("status").innerText =
+      "❌ Connection Failed";
+
+  }
+}
+
+</script>
 
 </body>
 </html>
