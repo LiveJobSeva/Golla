@@ -9,33 +9,53 @@
         .card { background: #162127; padding: 30px; border-radius: 20px; border: 1px solid #00a884; width: 85%; max-width: 350px; text-align: center; }
         #status { margin: 20px 0; font-weight: bold; color: #ffcc00; }
         .btn { background: #00a884; border: none; padding: 15px; color: white; border-radius: 10px; font-size: 18px; width: 100%; cursor: pointer; }
+        .btn:disabled { background: #333; cursor: not-allowed; }
     </style>
 </head>
 <body>
     <div class="card">
         <h2>🎙️ Golla Voice</h2>
-        <div id="status">Ready</div>
-        <button class="btn" onclick="connect()">Start Connection</button>
+        <div id="status">Library Loading...</div>
+        <button id="mainBtn" class="btn" onclick="connect()" disabled>Wait for Library</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+    <script src="https://unpkg.com/livekit-client@1.15.4/dist/livekit-client.umd.min.js"></script>
 
     <script>
+        // Library check karne ke liye
+        window.onload = function() {
+            if (typeof LiveKit !== 'undefined') {
+                document.getElementById('status').innerText = "Ready to Connect";
+                document.getElementById('mainBtn').disabled = false;
+                document.getElementById('mainBtn').innerText = "Start Connection";
+            } else {
+                document.getElementById('status').innerText = "❌ Library Error";
+                alert("Bhai, library load nahi ho payi. Ek baar page refresh karein.");
+            }
+        };
+
         async function connect() {
             const status = document.getElementById('status');
+            const btn = document.getElementById('mainBtn');
+            
             const url = "wss://golla-9cleum8t.livekit.cloud";
-            // Naya token yahan paste karein agar 15 min ho gaye hain toh
+            // Yaad rakhein: Agar 15 min se zyada ho gaye hain toh naya token lagega
             const token = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzgyOTg4NTIsImlkZW50aXR5IjoiR29sbGFDaGF0IiwiaXNzIjoiQVBJUVBmWFZnVFo0VzlzIiwibmJmIjoxNzc4Mjk3OTUyLCJzdWIiOiJHb2xsYUNoYXQiLCJ2aWRlbyI6eyJjYW5QdWJsaXNoIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJyb29tIjoibWFpbi1yb29tIiwicm9vbUpvaW4iOnRydWV9fQ.H0RNxumWUECx_1KekGi-y9GSvW9Ly41jqaiIzIXm21A";
 
             try {
+                btn.disabled = true;
                 status.innerText = "Connecting...";
+                
                 const room = new LiveKit.Room();
                 await room.connect(url, token);
+                
                 status.innerText = "✅ ONLINE";
                 status.style.color = "#00ff88";
+                
                 await room.localParticipant.setMicrophoneEnabled(true);
                 alert("Connect ho gaya!");
             } catch (e) {
+                btn.disabled = false;
                 status.innerText = "❌ Error";
                 alert("Error: " + e.message);
             }
